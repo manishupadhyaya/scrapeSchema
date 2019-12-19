@@ -2,6 +2,7 @@ const express = require('express')
 const request = require('request')
 const cheerio = require('cheerio')
 const mongoose = require('mongoose')
+const _ = require('lodash')
 const app = express();
 
 //
@@ -24,8 +25,7 @@ app.get('/scrape', (req, response) => {
                 message: "Error requesting database"
             })
         }
-        console.log(data)
-        if(data)
+        if(!data)
         {
             console.log("Hello")
             request(`http://disabilityaffairs.gov.in/content/page/schemes.php`, (error, res, html) => {
@@ -43,7 +43,7 @@ app.get('/scrape', (req, response) => {
                                     link = $(el).find('a').attr('href')
                                     t.push({name,link})
                                 })
-                                const data = new Data({scraped:JSON.stringify(t)})
+                                const data = new Data(JSON.stringify(t))
                                 data.save((err)=>{
                                     if(err)
                                     {
@@ -59,7 +59,41 @@ app.get('/scrape', (req, response) => {
             }
         })
         }
-    })
+        else
+        {
+                request(`http://disabilityaffairs.gov.in/content/page/schemes.php`, (error, res, html) => {
+                    let t = []
+                    let name = ''
+                    let link = ''
+                    if (!error && res.statusCode == 200) {
+                        const $ = cheerio.load(html);
+                        $('#content-section').each((i,el)=>{
+                            // console.log("First",$(el).text())
+                                $(el).find('#right-part-inner-page').each((i,el)=>{
+                                    $(el).find('.about-us-heading').each((i,el)=>{
+                                        $(el).find('li').each((i,el)=>{
+                                            name = $(el).find('a').text()
+                                            link = $(el).find('a').attr('href')
+                                            t.push({name,link})
+                                        })
+                                        const newObj = JSON.stringify(t)
+                                        _.extends(data, newObj)
+                                        data.save((err)=>{
+                                            if(err)
+                                            {
+                                                return response.status(400).send({
+                                                    message:"Could not save into database"
+                                                })
+                                            }
+                                        })
+                                        response.json(t)
+                                })
+                        });
+                    })
+                    }
+                })
+        }
+
 
 })
 
