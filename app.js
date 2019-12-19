@@ -21,11 +21,11 @@ app.get('/scrape', (req, response) => {
     Data.find({},(err,data)=>{
         if(err)
         {
-            return res.status(400).json({
+            return response.status(400).json({
                 message: "Error requesting database"
             })
         }
-        if(!data)
+        if(!data.length)
         {
             console.log("Hello")
             request(`http://disabilityaffairs.gov.in/content/page/schemes.php`, (error, res, html) => {
@@ -43,7 +43,7 @@ app.get('/scrape', (req, response) => {
                                     link = $(el).find('a').attr('href')
                                     t.push({name,link})
                                 })
-                                const data = new Data(JSON.stringify(t))
+                                const data = new Data({"scraped":JSON.stringify(t)})
                                 data.save((err)=>{
                                     if(err)
                                     {
@@ -61,6 +61,7 @@ app.get('/scrape', (req, response) => {
         }
         else
         {
+            console.log("Yo")
                 request(`http://disabilityaffairs.gov.in/content/page/schemes.php`, (error, res, html) => {
                     let t = []
                     let name = ''
@@ -76,9 +77,11 @@ app.get('/scrape', (req, response) => {
                                             link = $(el).find('a').attr('href')
                                             t.push({name,link})
                                         })
-                                        const newObj = JSON.stringify(t)
-                                        _.extends(data, newObj)
-                                        data.save((err)=>{
+                                        Data.remove({}, function(err) { 
+                                            console.log('collection removed') 
+                                         });
+                                        const newData = new Data({"scraped":JSON.stringify(t)})
+                                        newData.save((err)=>{
                                             if(err)
                                             {
                                                 return response.status(400).send({
@@ -87,14 +90,13 @@ app.get('/scrape', (req, response) => {
                                             }
                                         })
                                         response.json(t)
-                                })
-                        });
+                        })
                     })
-                    }
-                })
-        }
-    })
-
+                    })
+                }
+        })
+    }
+})
 })
 
 var port = process.env.PORT || 3000
