@@ -4,8 +4,9 @@ const cheerio = require('cheerio')
 
 const app = express();
 
-app.get('/scrape', (req, res) => {
+app.get('/scrape', (req, response) => {
     request(`http://disabilityaffairs.gov.in/content/page/schemes.php`, (error, res, html) => {
+        let t = []
         if (!error && res.statusCode == 200) {
             const $ = cheerio.load(html);
             $('#content-section').each((i,el)=>{
@@ -13,8 +14,9 @@ app.get('/scrape', (req, res) => {
                     $(el).find('#right-part-inner-page').each((i,el)=>{
                         $(el).find('.about-us-heading').each((i,el)=>{
                             $(el).find('li').each((i,el)=>{
-                                console.log($(el).find('a').attr('href'))
+                                t.push($(el).find('a').attr('href'))
                             })
+                            response.send(t)
                     })
             });
         })
