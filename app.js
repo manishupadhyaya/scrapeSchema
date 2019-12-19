@@ -93,7 +93,7 @@ app.get('/scrape', (req, response) => {
                     }
                 })
         }
-
+    })
 
 })
 
