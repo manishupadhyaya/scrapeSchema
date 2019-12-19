@@ -43,7 +43,7 @@ app.get('/scrape', (req, response) => {
                                     link = $(el).find('a').attr('href')
                                     t.push({name,link})
                                 })
-                                const data = new Data({"scraped":JSON.stringify(t)})
+                                const data = new Data({scraped:JSON.stringify(t)})
                                 data.save((err)=>{
                                     if(err)
                                     {
@@ -80,7 +80,7 @@ app.get('/scrape', (req, response) => {
                                         Data.remove({}, function(err) { 
                                             console.log('collection removed') 
                                          });
-                                        const newData = new Data({"scraped":JSON.stringify(t)})
+                                        const newData = new Data({scraped:JSON.stringify(t)})
                                         newData.save((err)=>{
                                             if(err)
                                             {
