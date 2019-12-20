@@ -2,9 +2,9 @@ const express = require('express')
 const request = require('request')
 const cheerio = require('cheerio')
 const mongoose = require('mongoose')
-const _ = require('lodash')
+const cors = require('cors')
 const app = express();
-
+app.use(cors())
 //
 const Data = require('./models/Data')
 //
